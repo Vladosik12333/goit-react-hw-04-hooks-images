@@ -15,7 +15,7 @@ export default function ImageGallery({ search, onClickToModal }) {
   useEffect(() => {
     if (!search) return;
 
-    fetchImages();
+    fetchImages(1);
 
     return () => {
       setError(null);
@@ -25,9 +25,10 @@ export default function ImageGallery({ search, onClickToModal }) {
     };
   }, [search]);
 
-  const fetchImages = () => {
+  const fetchImages = page => {
+    const isPage = typeof page === 'number';
     setStatus('pending');
-    api(search, nextPage).then(resp => {
+    api(search, isPage ? page : nextPage).then(resp => {
       if (typeof resp !== 'string') {
         setImages(images => [...images, ...resp.hits]);
         setStatus('resolved');
@@ -68,7 +69,8 @@ export default function ImageGallery({ search, onClickToModal }) {
                 key={id}
                 url={webformatURL}
                 tags={tags}
-                onClickToModal={() => onClickToModal(largeImageURL)}
+                onClickToModal={onClickToModal}
+                largeImageURL={largeImageURL}
               />
             );
           })}

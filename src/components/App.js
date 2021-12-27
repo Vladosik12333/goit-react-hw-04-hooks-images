@@ -8,17 +8,17 @@ export default function App() {
   const [modalNow, setModalNow] = useState(null);
   const [currentSearch, setCurrentSearch] = useState('');
 
+  const onSubmit = search => {
+    setCurrentSearch(search);
+  };
+
   const onModal = url => {
     setModalNow(url);
   };
 
   return (
     <AppStyled>
-      <Searchbar
-        onSubmit={search => {
-          setCurrentSearch(search);
-        }}
-      />
+      <Searchbar onSubmit={onSubmit} />
       <ImageGallery search={currentSearch} onClickToModal={onModal} />
       {modalNow && <Modal largeImg={modalNow} closeModal={onModal} />}
     </AppStyled>
