@@ -6,42 +6,44 @@ import Loader from 'components/Loader';
 import { List } from './ImageGallery.styled';
 import propTypes from 'prop-types';
 
-export default function ImageGallery({ search, onClickToModal }) {
+export default function ImageGallery({
+  search,
+  onClickToModal,
+  page,
+  setPage,
+}) {
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState(null);
   const [images, setImages] = useState([]);
-  const [nextPage, setNextPage] = useState(1);
 
   useEffect(() => {
     if (!search) return;
 
-    fetchImages(1);
-
-    return () => {
-      setError(null);
-      setNextPage(1);
+    if (page === 1) {
       setImages([]);
       setStatus('idle');
-    };
-  }, [search]);
+      setError(null);
+    }
 
-  const fetchImages = page => {
-    const isPage = typeof page === 'number';
     setStatus('pending');
-    api(search, isPage ? page : nextPage).then(resp => {
+
+    api(search, page).then(resp => {
       if (typeof resp !== 'string') {
         setImages(images => [...images, ...resp.hits]);
         setStatus('resolved');
-        setNextPage(number => number + 1);
         scrollToBottom();
         return;
       }
 
       setError(resp);
       setStatus('rejected');
-      setNextPage(1);
+      setPage(1);
       setImages([]);
     });
+  }, [search, page]);
+
+  const onClickButton = () => {
+    setPage(page => page + 1);
   };
 
   const scrollToBottom = () => {
@@ -75,7 +77,7 @@ export default function ImageGallery({ search, onClickToModal }) {
             );
           })}
         </List>
-        <Button onClickButton={fetchImages} />
+        <Button onClickButton={onClickButton} />
       </>
     );
   }
