@@ -39,13 +39,13 @@ export default function ImageGallery({
   }, [search, page]);
 
   useEffect(() => {
-    if (status !== 'resolved') return;
+    if (images.length === 0) return;
 
     window.scrollTo({
       top: document.body.clientHeight,
       behavior: 'smooth',
     });
-  });
+  }, [images]);
 
   const onClickButton = () => {
     setPage(page => page + 1);
