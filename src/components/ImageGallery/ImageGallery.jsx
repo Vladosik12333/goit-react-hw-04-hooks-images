@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import api from '../../service/pixabayApi';
 import ImageGalleryItem from 'components/ImageGalleryItem';
 import Button from 'components/Button';
-import Loader from 'components/Loader';
 import { List } from './ImageGallery.styled';
 import propTypes from 'prop-types';
 
@@ -25,13 +24,10 @@ export default function ImageGallery({
       setError(null);
     }
 
-    setStatus('pending');
-
     api(search, page).then(resp => {
       if (typeof resp !== 'string') {
         setImages(images => [...images, ...resp.hits]);
         setStatus('resolved');
-        scrollToBottom();
         return;
       }
 
@@ -42,47 +38,47 @@ export default function ImageGallery({
     });
   }, [search, page]);
 
+  useEffect(() => {
+    if (status !== 'resolved') return;
+
+    window.scrollTo({
+      top: document.body.clientHeight,
+      behavior: 'smooth',
+    });
+  });
+
   const onClickButton = () => {
     setPage(page => page + 1);
   };
-
-  const scrollToBottom = () => {
-    window.scrollTo({
-      top: 999999999,
-      behavior: 'smooth',
-    });
-  };
-
-  if (status === 'pending') {
-    return <Loader />;
-  }
 
   if (status === 'rejected') {
     return <h1>{error}</h1>;
   }
 
-  if (status === 'resolved') {
-    return (
-      <>
-        <List>
-          {images.map(({ id, webformatURL, tags, largeImageURL }) => {
-            return (
-              <ImageGalleryItem
-                key={id}
-                url={webformatURL}
-                tags={tags}
-                onClickToModal={onClickToModal}
-                largeImageURL={largeImageURL}
-              />
-            );
-          })}
-        </List>
-        <Button onClickButton={onClickButton} />
-      </>
-    );
-  }
-
-  return <></>;
+  return (
+    <>
+      {images.length !== 0 ? (
+        <>
+          <List>
+            {images.map(({ id, webformatURL, tags, largeImageURL }) => {
+              return (
+                <ImageGalleryItem
+                  key={id}
+                  url={webformatURL}
+                  tags={tags}
+                  onClickToModal={onClickToModal}
+                  largeImageURL={largeImageURL}
+                />
+              );
+            })}
+          </List>
+          <Button onClickButton={onClickButton} />
+        </>
+      ) : (
+        <></>
+      )}
+    </>
+  );
 }
 
 ImageGallery.propTypes = {
