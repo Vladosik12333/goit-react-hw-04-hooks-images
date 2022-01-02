@@ -4,6 +4,7 @@ import ImageGalleryItem from 'components/ImageGalleryItem';
 import Button from 'components/Button';
 import { List } from './ImageGallery.styled';
 import propTypes from 'prop-types';
+import Spinner from 'components/Spinner';
 
 export default function ImageGallery({
   search,
@@ -24,31 +25,29 @@ export default function ImageGallery({
       setError(null);
     }
 
-    api(search, page).then(resp => {
-      if (typeof resp !== 'string') {
+    setStatus('pending');
+    api(search, page)
+      .then(resp => {
         setImages(images => [...images, ...resp.hits]);
         setStatus('resolved');
-        return;
-      }
-
-      setError(resp);
-      setStatus('rejected');
-      setPage(1);
-      setImages([]);
-    });
+        scrollToBottom();
+      })
+      .catch(error => {
+        setError(error.message);
+        setStatus('rejected');
+        setImages([]);
+      });
   }, [search, page]);
 
-  useEffect(() => {
-    if (images.length === 0) return;
+  const onClickButton = () => {
+    setPage(1);
+  };
 
+  const scrollToBottom = () => {
     window.scrollTo({
       top: document.body.clientHeight,
       behavior: 'smooth',
     });
-  }, [images]);
-
-  const onClickButton = () => {
-    setPage(page => page + 1);
   };
 
   if (status === 'rejected') {
@@ -57,26 +56,23 @@ export default function ImageGallery({
 
   return (
     <>
-      {images.length !== 0 ? (
-        <>
-          <List>
-            {images.map(({ id, webformatURL, tags, largeImageURL }) => {
-              return (
-                <ImageGalleryItem
-                  key={id}
-                  url={webformatURL}
-                  tags={tags}
-                  onClickToModal={onClickToModal}
-                  largeImageURL={largeImageURL}
-                />
-              );
-            })}
-          </List>
-          <Button onClickButton={onClickButton} />
-        </>
-      ) : (
-        <></>
+      {images.length !== 0 && (
+        <List>
+          {images.map(({ id, webformatURL, tags, largeImageURL }) => {
+            return (
+              <ImageGalleryItem
+                key={id}
+                url={webformatURL}
+                tags={tags}
+                onClickToModal={onClickToModal}
+                largeImageURL={largeImageURL}
+              />
+            );
+          })}
+        </List>
       )}
+      {status === 'pending' && <Spinner />}
+      {status === 'resolved' && <Button onClickButton={onClickButton} />}
     </>
   );
 }

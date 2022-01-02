@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Searchbar from 'components/Searchbar';
 import ImageGallery from 'components/ImageGallery';
 import Modal from 'components/Modal';
@@ -18,6 +18,10 @@ export default function App() {
     setModalNow(url);
   };
 
+  const setNextPage = nextPage => {
+    setPage(page => page + nextPage);
+  };
+
   return (
     <AppStyled>
       <Searchbar onSubmit={onSubmit} />
@@ -25,7 +29,7 @@ export default function App() {
         search={currentSearch}
         onClickToModal={onModal}
         page={page}
-        setPage={setPage}
+        setPage={setNextPage}
       />
       {modalNow && <Modal largeImg={modalNow} closeModal={onModal} />}
     </AppStyled>
